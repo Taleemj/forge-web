@@ -5,6 +5,7 @@ import type {
   House,
   Land,
   LoginPayload,
+  MaintenanceRequestPayload,
   ManagementService,
   Notification,
   Project,
@@ -108,6 +109,14 @@ export const forgeApi = {
 
   async notifications() {
     const response = await apiClient.get<Notification[]>("/auth/notifications");
+    return response.data;
+  },
+
+  async requestMaintenance(payload: MaintenanceRequestPayload, authenticated: boolean) {
+    const response = await apiClient.post<{ message: string; request: unknown }>(
+      authenticated ? "/auth/maintenance-requests" : "/public/maintenance-requests",
+      payload,
+    );
     return response.data;
   },
 };

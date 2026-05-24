@@ -161,6 +161,23 @@ export type ResetPasswordPayload = {
   newPassword: string;
 };
 
+export type MaintenanceRequestPayload = {
+  serviceId: string;
+  location: {
+    label?: string;
+    latitude?: number;
+    longitude?: number;
+    pinX?: number;
+    pinY?: number;
+  };
+  propertyNotes?: string;
+  guestInfo?: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+};
+
 export type AuthResponse = {
   token: string;
   user: User;

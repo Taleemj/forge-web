@@ -17,6 +17,7 @@ import type {
   House,
   Land,
   LoginPayload,
+  MaintenanceRequestPayload,
   ManagementService,
   Notification,
   Project,
@@ -62,6 +63,9 @@ type ForgeWebContextValue = {
   forgotPassword: (email: string) => Promise<{ success: boolean; message?: string }>;
   resetPassword: (
     payload: ResetPasswordPayload,
+  ) => Promise<{ success: boolean; message?: string }>;
+  requestMaintenanceService: (
+    payload: MaintenanceRequestPayload,
   ) => Promise<{ success: boolean; message?: string }>;
   signOut: () => void;
 };
@@ -281,6 +285,18 @@ export function ForgeWebProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const requestMaintenanceService = useCallback(
+    async (payload: MaintenanceRequestPayload) => {
+      try {
+        const response = await forgeApi.requestMaintenance(payload, Boolean(getStoredToken()));
+        return { success: true, message: response.message };
+      } catch (error) {
+        return { success: false, message: getApiErrorMessage(error) };
+      }
+    },
+    [],
+  );
+
   useEffect(() => {
     let isMounted = true;
     Promise.allSettled([
@@ -327,6 +343,7 @@ export function ForgeWebProvider({ children }: { children: ReactNode }) {
       resendOTP,
       forgotPassword,
       resetPassword,
+      requestMaintenanceService,
       signOut,
     }),
     [
@@ -351,6 +368,7 @@ export function ForgeWebProvider({ children }: { children: ReactNode }) {
       resendOTP,
       forgotPassword,
       resetPassword,
+      requestMaintenanceService,
       signOut,
     ],
   );
