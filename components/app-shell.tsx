@@ -221,19 +221,23 @@ export function AppShell({ children }: { children: ReactNode }) {
       </footer>
 
       <nav className="mobile-tabs" aria-label="Primary">
-        {primaryLinks.map((item) => {
-          const active = selectedKey(pathname) === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={active ? "is-active" : ""}
-            >
-              {item.icon}
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
+        {primaryLinks
+          .filter((item) => item.label !== "Projects")
+          .map((item) => {
+            const active = selectedKey(pathname) === item.href;
+            const label =
+              item.label === "Property Maintenance" ? "Maintenance" : item.label;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={active ? "is-active" : ""}
+              >
+                {item.icon}
+                <span>{label}</span>
+              </Link>
+            );
+          })}
       </nav>
 
       <Drawer

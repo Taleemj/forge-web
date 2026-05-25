@@ -932,13 +932,14 @@ a {
     border-top: 1px solid #e5e7eb;
     bottom: 0;
     box-shadow: 0 -12px 32px rgba(15, 23, 42, 0.08);
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    display: flex;
     height: 72px;
     left: 0;
     position: fixed;
     right: 0;
     z-index: 80;
+    justify-content: space-around;
+    padding: 0 4px;
   }
 
   .mobile-tabs a {
@@ -946,10 +947,12 @@ a {
     color: #475569;
     display: flex;
     flex-direction: column;
-    font-size: 23px;
-    gap: 5px;
+    font-size: 28px;
+    gap: 4px;
     justify-content: center;
     min-width: 0;
+    flex: 1;
+    text-decoration: none;
   }
 
   .mobile-tabs a .anticon {
@@ -957,11 +960,15 @@ a {
   }
 
   .mobile-tabs a span {
-    font-size: 9px;
+    font-size: 12px;
     font-weight: 800;
-    line-height: 1.05;
-    max-width: 68px;
+    line-height: 1.1;
+    max-width: 100%;
     text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 2px;
   }
 
   .mobile-tabs a.is-active {
