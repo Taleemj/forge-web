@@ -105,6 +105,24 @@ a {
   min-width: 0;
 }
 
+.web-desktop-menu.ant-menu-horizontal {
+  line-height: 40px;
+}
+
+.web-desktop-menu.ant-menu-horizontal > .ant-menu-item,
+.web-desktop-menu.ant-menu-horizontal > .ant-menu-submenu {
+  padding-inline: 14px;
+}
+
+.web-desktop-menu.ant-menu-horizontal::after {
+  display: none;
+}
+
+.web-desktop-menu.ant-menu-horizontal > .ant-menu-item::after,
+.web-desktop-menu.ant-menu-horizontal > .ant-menu-submenu::after {
+  bottom: 6px !important;
+}
+
 .explore-tabs {
   background: #ffffff;
   border: 1px solid rgba(15, 23, 42, 0.08);
@@ -448,6 +466,51 @@ a {
   justify-content: flex-end;
   margin-top: 8px;
   width: 100%;
+}
+
+.compact-request-form .ant-form-item {
+  margin-bottom: 10px;
+}
+
+.compact-request-form .ant-form-item-label {
+  padding-bottom: 3px;
+}
+
+.compact-request-form .ant-form-item-label > label {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.construction-interest-form .ant-typography {
+  font-size: 13px;
+}
+
+.construction-process,
+.construction-cta {
+  margin-top: 28px;
+}
+
+.web-markdown-content h2,
+.web-markdown-content h3,
+.web-markdown-content h4 {
+  margin-top: 0 !important;
+}
+
+.web-markdown-content p {
+  color: #475569;
+  line-height: 1.7;
+}
+
+.web-markdown-content ol,
+.web-markdown-content ul {
+  color: #475569;
+  line-height: 1.7;
+  margin: 0 0 0 22px;
+  padding: 0;
+}
+
+.web-markdown-content li + li {
+  margin-top: 8px;
 }
 
 .project-card h4 {

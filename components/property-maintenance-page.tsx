@@ -14,7 +14,7 @@ export function PropertyMaintenancePage() {
 
   useEffect(() => {
     fetchPublicData();
-  }, [fetchPublicData]);
+  }, []);
 
   return (
     <AppShell>
@@ -23,12 +23,19 @@ export function PropertyMaintenancePage() {
           <Space direction="vertical" size={4}>
             <Text className="dashboard-kicker">Property care</Text>
             <Title level={1}>Property Maintenance</Title>
-            <Text type="secondary">Browse services and request property support.</Text>
+            <Text type="secondary">
+              Browse services and request property support.
+            </Text>
           </Space>
         </div>
 
         {errors.publicData ? (
-          <Alert type="warning" showIcon message={errors.publicData} style={{ marginBottom: 18 }} />
+          <Alert
+            type="warning"
+            showIcon
+            message={errors.publicData}
+            style={{ marginBottom: 18 }}
+          />
         ) : null}
 
         {services.length ? (

@@ -2,6 +2,7 @@
 
 import {
   BellOutlined,
+  BuildOutlined,
   CreditCardOutlined,
   CompassOutlined,
   HomeOutlined,
@@ -36,6 +37,7 @@ const { Text, Title } = Typography;
 
 const primaryLinks = [
   { href: "/", label: "Home", icon: <HomeOutlined /> },
+  { href: "/#services", label: "Services", icon: <BuildOutlined /> },
   {
     href: "/property-maintenance",
     label: "Property Maintenance",
@@ -59,9 +61,14 @@ const secondaryLinks = [
 ];
 
 function selectedKey(pathname: string) {
+  if (typeof window !== "undefined" && window.location.hash === "#services") {
+    return "/#services";
+  }
+
   const match = [...primaryLinks, ...secondaryLinks]
     .map((item) => item.href)
     .filter((href) => href !== "/")
+    .filter((href) => !href.startsWith("/#"))
     .sort((a, b) => b.length - a.length)
     .find((href) => pathname.startsWith(href.split("#")[0]));
 
@@ -182,6 +189,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
             <div>
               <Text className="web-footer-heading">Services</Text>
+              <Link href="/construction">Construction</Link>
               <Link href="/property-maintenance">Property Maintenance</Link>
               <Link href="/land-listings">Land Listings</Link>
               <Link href="/house-listings">House Listings</Link>

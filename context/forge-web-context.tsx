@@ -13,6 +13,8 @@ import {
 import { AUTH_TOKEN_KEY, getApiErrorMessage } from "@/lib/api";
 import { forgeApi } from "@/lib/forge-api";
 import type {
+  ConstructionRequestPayload,
+  ConstructionService,
   Design,
   House,
   Land,
@@ -43,6 +45,7 @@ type ForgeWebContextValue = {
   designs: Design[];
   houses: House[];
   services: ManagementService[];
+  constructionService: ConstructionService | null;
   projects: Project[];
   notifications: Notification[];
   isInitialLoading: boolean;
@@ -58,22 +61,34 @@ type ForgeWebContextValue = {
   signUp: (
     payload: SignUpPayload,
   ) => Promise<{ success: boolean; message?: string; email?: string }>;
-  verifyOTP: (email: string, otp: string) => Promise<{ success: boolean; message?: string }>;
+  verifyOTP: (
+    email: string,
+    otp: string,
+  ) => Promise<{ success: boolean; message?: string }>;
   resendOTP: (email: string) => Promise<{ success: boolean; message?: string }>;
-  forgotPassword: (email: string) => Promise<{ success: boolean; message?: string }>;
+  forgotPassword: (
+    email: string,
+  ) => Promise<{ success: boolean; message?: string }>;
   resetPassword: (
     payload: ResetPasswordPayload,
   ) => Promise<{ success: boolean; message?: string }>;
   requestMaintenanceService: (
     payload: MaintenanceRequestPayload,
   ) => Promise<{ success: boolean; message?: string }>;
+  requestConstructionService: (
+    payload: ConstructionRequestPayload,
+  ) => Promise<{ success: boolean; message?: string }>;
   signOut: () => void;
 };
 
-const ForgeWebContext = createContext<ForgeWebContextValue | undefined>(undefined);
+const ForgeWebContext = createContext<ForgeWebContextValue | undefined>(
+  undefined,
+);
 
 function getStoredToken() {
-  return typeof window !== "undefined" ? window.localStorage.getItem(AUTH_TOKEN_KEY) : null;
+  return typeof window !== "undefined"
+    ? window.localStorage.getItem(AUTH_TOKEN_KEY)
+    : null;
 }
 
 function createFallbackId() {
@@ -83,7 +98,9 @@ function createFallbackId() {
   return `item-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-function normalizeId<T extends { _id?: string; id?: string }>(item: T): T & { id: string } {
+function normalizeId<T extends { _id?: string; id?: string }>(
+  item: T,
+): T & { id: string } {
   return { ...item, id: item._id || item.id || createFallbackId() };
 }
 
@@ -94,6 +111,8 @@ export function ForgeWebProvider({ children }: { children: ReactNode }) {
   const [designs, setDesigns] = useState<Design[]>([]);
   const [houses, setHouses] = useState<House[]>([]);
   const [services, setServices] = useState<ManagementService[]>([]);
+  const [constructionService, setConstructionService] =
+    useState<ConstructionService | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -119,36 +138,40 @@ export function ForgeWebProvider({ children }: { children: ReactNode }) {
     setLastNotificationsFetch(0);
   }, []);
 
-  const fetchPublicData = useCallback(
-    async (force = false) => {
-      if (!force && lastPublicFetch && Date.now() - lastPublicFetch < STALE_AFTER_MS) {
-        return;
-      }
+  const fetchPublicData = useCallback(async (force = false) => {
+    if (
+      !force &&
+      lastPublicFetch &&
+      Date.now() - lastPublicFetch < STALE_AFTER_MS
+    ) {
+      return;
+    }
 
-      setIsRefreshing(true);
-      try {
-        const data = await forgeApi.getPublicData();
-        setLands(data.lands.map(normalizeId));
-        setDesigns(data.designs.map(normalizeId));
-        setHouses(data.houses.map(normalizeId));
-        setServices(
-          data.services
-            .filter((service) => service.status !== "archived")
-            .map(normalizeId),
-        );
-        setLastPublicFetch(Date.now());
-        clearError("publicData");
-      } catch (error) {
-        setErrors((current) => ({
-          ...current,
-          publicData: getApiErrorMessage(error),
-        }));
-      } finally {
-        setIsRefreshing(false);
-      }
-    },
-    [clearError, lastPublicFetch],
-  );
+    setIsRefreshing(true);
+    try {
+      const data = await forgeApi.getPublicData();
+      setLands(data.lands.map(normalizeId));
+      setDesigns(data.designs.map(normalizeId));
+      setHouses(data.houses.map(normalizeId));
+      setServices(
+        data.services
+          .filter((service) => service.status !== "archived")
+          .map(normalizeId),
+      );
+      setConstructionService(
+        data.constructionService ? normalizeId(data.constructionService) : null,
+      );
+      setLastPublicFetch(Date.now());
+      clearError("publicData");
+    } catch (error) {
+      setErrors((current) => ({
+        ...current,
+        publicData: getApiErrorMessage(error),
+      }));
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
 
   const refreshUser = useCallback(async () => {
     if (!getStoredToken()) return;
@@ -169,7 +192,11 @@ export function ForgeWebProvider({ children }: { children: ReactNode }) {
   const fetchProjects = useCallback(
     async (force = false) => {
       if (!getStoredToken()) return;
-      if (!force && lastProjectsFetch && Date.now() - lastProjectsFetch < STALE_AFTER_MS) {
+      if (
+        !force &&
+        lastProjectsFetch &&
+        Date.now() - lastProjectsFetch < STALE_AFTER_MS
+      ) {
         return;
       }
 
@@ -240,7 +267,11 @@ export function ForgeWebProvider({ children }: { children: ReactNode }) {
   const signUp = useCallback(async (payload: SignUpPayload) => {
     try {
       const response = await forgeApi.register(payload);
-      return { success: true, message: response.message, email: response.email };
+      return {
+        success: true,
+        message: response.message,
+        email: response.email,
+      };
     } catch (error) {
       return { success: false, message: getApiErrorMessage(error) };
     }
@@ -288,7 +319,25 @@ export function ForgeWebProvider({ children }: { children: ReactNode }) {
   const requestMaintenanceService = useCallback(
     async (payload: MaintenanceRequestPayload) => {
       try {
-        const response = await forgeApi.requestMaintenance(payload, Boolean(getStoredToken()));
+        const response = await forgeApi.requestMaintenance(
+          payload,
+          Boolean(getStoredToken()),
+        );
+        return { success: true, message: response.message };
+      } catch (error) {
+        return { success: false, message: getApiErrorMessage(error) };
+      }
+    },
+    [],
+  );
+
+  const requestConstructionService = useCallback(
+    async (payload: ConstructionRequestPayload) => {
+      try {
+        const response = await forgeApi.requestConstruction(
+          payload,
+          Boolean(getStoredToken()),
+        );
         return { success: true, message: response.message };
       } catch (error) {
         return { success: false, message: getApiErrorMessage(error) };
@@ -316,7 +365,8 @@ export function ForgeWebProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const handleExpired = () => signOut();
     window.addEventListener("forge-user-auth-expired", handleExpired);
-    return () => window.removeEventListener("forge-user-auth-expired", handleExpired);
+    return () =>
+      window.removeEventListener("forge-user-auth-expired", handleExpired);
   }, [signOut]);
 
   const value = useMemo(
@@ -328,6 +378,7 @@ export function ForgeWebProvider({ children }: { children: ReactNode }) {
       designs,
       houses,
       services,
+      constructionService,
       projects,
       notifications,
       isInitialLoading,
@@ -344,6 +395,7 @@ export function ForgeWebProvider({ children }: { children: ReactNode }) {
       forgotPassword,
       resetPassword,
       requestMaintenanceService,
+      requestConstructionService,
       signOut,
     }),
     [
@@ -353,6 +405,7 @@ export function ForgeWebProvider({ children }: { children: ReactNode }) {
       designs,
       houses,
       services,
+      constructionService,
       projects,
       notifications,
       isInitialLoading,
@@ -369,11 +422,16 @@ export function ForgeWebProvider({ children }: { children: ReactNode }) {
       forgotPassword,
       resetPassword,
       requestMaintenanceService,
+      requestConstructionService,
       signOut,
     ],
   );
 
-  return <ForgeWebContext.Provider value={value}>{children}</ForgeWebContext.Provider>;
+  return (
+    <ForgeWebContext.Provider value={value}>
+      {children}
+    </ForgeWebContext.Provider>
+  );
 }
 
 export function useForgeWeb() {

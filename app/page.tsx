@@ -40,7 +40,7 @@ const serviceCards = [
     title: "Construction",
     description:
       "Start and monitor a remote construction project with clear progress tracking.",
-    href: "/projects",
+    href: "/construction",
     icon: <BuildOutlined />,
     image: "/projects.jpg",
   },
@@ -181,7 +181,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="page-section">
+      <section className="page-section" id="services">
         {errors.publicData ? (
           <Alert
             showIcon

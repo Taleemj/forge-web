@@ -102,6 +102,22 @@ export type ManagementService = {
   descriptionMarkdown?: string;
 };
 
+export type ConstructionService = {
+  id: string;
+  _id?: string;
+  title: string;
+  subtitle?: string;
+  description: string;
+  processMarkdown?: string;
+  consultationText?: string;
+  startingPrice?: number;
+  status: "active" | "draft" | "archived";
+  images: string[];
+  media?: MediaItem[];
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 export type ProjectUpdate = {
   id?: string;
   _id?: string;
@@ -171,6 +187,23 @@ export type MaintenanceRequestPayload = {
     pinY?: number;
   };
   propertyNotes?: string;
+  guestInfo?: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+};
+
+export type ConstructionRequestPayload = {
+  location?: {
+    label?: string;
+    latitude?: number;
+    longitude?: number;
+  };
+  budgetRange?: string;
+  timeline?: string;
+  meetingPreference?: string;
+  notes?: string;
   guestInfo?: {
     name: string;
     email: string;

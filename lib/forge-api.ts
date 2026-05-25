@@ -1,6 +1,8 @@
 import { apiClient } from "@/lib/api";
 import type {
   AuthResponse,
+  ConstructionRequestPayload,
+  ConstructionService,
   Design,
   House,
   Land,
@@ -16,11 +18,12 @@ import type {
 
 export const forgeApi = {
   async getPublicData() {
-    const [lands, designs, houses, services] = await Promise.all([
+    const [lands, designs, houses, services, constructionService] = await Promise.all([
       apiClient.get<Land[]>("/public/lands"),
       apiClient.get<Design[]>("/public/designs"),
       apiClient.get<House[]>("/public/houses"),
       apiClient.get<ManagementService[]>("/public/management-services"),
+      apiClient.get<ConstructionService | null>("/public/construction-service"),
     ]);
 
     return {
@@ -28,6 +31,7 @@ export const forgeApi = {
       designs: designs.data,
       houses: houses.data,
       services: services.data,
+      constructionService: constructionService.data,
     };
   },
 
@@ -115,6 +119,14 @@ export const forgeApi = {
   async requestMaintenance(payload: MaintenanceRequestPayload, authenticated: boolean) {
     const response = await apiClient.post<{ message: string; request: unknown }>(
       authenticated ? "/auth/maintenance-requests" : "/public/maintenance-requests",
+      payload,
+    );
+    return response.data;
+  },
+
+  async requestConstruction(payload: ConstructionRequestPayload, authenticated: boolean) {
+    const response = await apiClient.post<{ message: string; request: unknown }>(
+      authenticated ? "/auth/construction-requests" : "/public/construction-requests",
       payload,
     );
     return response.data;
