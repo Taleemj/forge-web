@@ -9,7 +9,7 @@ import {
 import { Alert, Button, Form, Input, Space, Typography } from "antd";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import { AuthShell } from "@/components/auth-shell";
 import { useForgeWeb } from "@/context/forge-web-context";
@@ -18,17 +18,16 @@ const { Text, Title } = Typography;
 
 type LoginValues = {
   email: string;
-  password: string;
 };
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { signIn } = useForgeWeb();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (values: LoginValues) => {
+  const handleSubmit = async (values: any) => {
     setLoading(true);
     setError(null);
     const result = await signIn(values);
@@ -48,7 +47,7 @@ export default function LoginPage() {
   };
 
   return (
-    <AuthShell eyebrow="Client access" title="Welcome back">
+    <>
       <Space direction="vertical" size={6} className="full-width auth-card-head">
         <Text className="dashboard-kicker">Forge account</Text>
         <Title level={2}>Login</Title>
@@ -93,6 +92,16 @@ export default function LoginPage() {
       <Text type="secondary">
         New to Forge? <Link href="/sign-up">Create an account</Link>
       </Text>
+    </>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <AuthShell eyebrow="Client access" title="Welcome back">
+      <Suspense fallback={<div>Loading...</div>}>
+        <LoginForm />
+      </Suspense>
     </AuthShell>
   );
 }

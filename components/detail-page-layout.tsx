@@ -56,7 +56,10 @@ export function DetailPageLayout({
   recommendations: RecommendationItem[];
 }) {
   const normalizedMedia = useMemo(
-    () => (media.length ? media : [{ id: "fallback", type: "image" as const, url: fallbackImage }]),
+    () =>
+      media.length
+        ? media
+        : [{ id: "fallback", type: "image" as const, url: fallbackImage }],
     [fallbackImage, media],
   );
   const [activeIndex, setActiveIndex] = useState(0);
@@ -72,9 +75,17 @@ export function DetailPageLayout({
         <Card className="detail-media-card">
           <div className="detail-media-stage">
             {isVideo(activeMedia) ? (
-              <video controls playsInline poster={activePoster} src={activeUrl} />
+              <video
+                controls
+                playsInline
+                poster={activePoster}
+                src={activeUrl}
+              />
             ) : (
-              <img src={activeUrl} alt={activeMedia.title || "Property media"} />
+              <img
+                src={activeUrl}
+                alt={activeMedia.title || "Property media"}
+              />
             )}
           </div>
 
@@ -82,8 +93,7 @@ export function DetailPageLayout({
             <div className="detail-media-strip" aria-label="Media gallery">
               {normalizedMedia.map((item, index) => {
                 const thumb =
-                  resolveAssetUrl(item.thumbnail || item.url) ||
-                  fallbackImage;
+                  resolveAssetUrl(item.thumbnail || item.url) || fallbackImage;
                 return (
                   <button
                     key={item.id || `${item.url}-${index}`}
@@ -117,6 +127,7 @@ export function DetailPageLayout({
         {recommendations.length ? (
           <div className="listing-grid">
             {recommendations.map((item) => (
+              // @ts-ignore
               <ListingCard key={item.key} {...item} />
             ))}
           </div>

@@ -4,7 +4,7 @@ import { LockOutlined, MailOutlined, SafetyCertificateOutlined } from "@ant-desi
 import { Alert, Button, Form, Input, Space, Typography } from "antd";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import { AuthShell } from "@/components/auth-shell";
 import { useForgeWeb } from "@/context/forge-web-context";
@@ -12,7 +12,7 @@ import type { ResetPasswordPayload } from "@/types";
 
 const { Text, Title } = Typography;
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { resetPassword } = useForgeWeb();
@@ -34,7 +34,7 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <AuthShell eyebrow="Account recovery" title="Choose a new password">
+    <>
       <Space direction="vertical" size={6} className="full-width auth-card-head">
         <Text className="dashboard-kicker">Reset password</Text>
         <Title level={2}>Enter OTP</Title>
@@ -72,6 +72,16 @@ export default function ResetPasswordPage() {
       </Form>
 
       <Link href="/login">Back to login</Link>
+    </>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <AuthShell eyebrow="Account recovery" title="Choose a new password">
+      <Suspense fallback={<div>Loading...</div>}>
+        <ResetPasswordForm />
+      </Suspense>
     </AuthShell>
   );
 }
