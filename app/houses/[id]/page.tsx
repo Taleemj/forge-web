@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Empty, Space, Tag, Typography } from "antd";
+import { Button, Empty, Skeleton, Space, Tag, Typography } from "antd";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
 
@@ -15,7 +15,7 @@ const fallbackImage =
 
 export default function HouseDetailPage() {
   const params = useParams<{ id: string }>();
-  const { houses, fetchPublicData } = useForgeWeb();
+  const { houses, isInitialLoading, isRefreshing, fetchPublicData } = useForgeWeb();
   const house = houses.find((item) => item.id === params.id);
   const recommendations = houses
     .filter((item) => item.id !== params.id)
@@ -37,7 +37,22 @@ export default function HouseDetailPage() {
   return (
     <AppShell>
       <section className="page-section">
-        {house ? (
+        {isInitialLoading || (isRefreshing && !house) ? (
+          <DetailPageLayout
+            loading
+            media={[]}
+            fallbackImage={fallbackImage}
+            recommendationsTitle="Similar House Listings"
+            recommendations={[]}
+            details={
+              <Space direction="vertical" size={12} className="full-width">
+                <Skeleton.Button active style={{ width: 120 }} />
+                <Skeleton active title={{ width: "60%" }} paragraph={{ rows: 3 }} />
+                <Skeleton.Button active block size="large" />
+              </Space>
+            }
+          />
+        ) : house ? (
           <DetailPageLayout
             media={buildMediaItems(house.images, house.media)}
             fallbackImage={fallbackImage}

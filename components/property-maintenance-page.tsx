@@ -1,20 +1,21 @@
 "use client";
 
-import { Alert, Empty, Space, Typography } from "antd";
+import { Alert, Empty, Skeleton, Space, Typography } from "antd";
 import { useEffect } from "react";
 
 import { AppShell } from "@/components/app-shell";
 import { ListingCard } from "@/components/listing-card";
+import { ListingSkeletonGrid } from "@/components/listing-skeleton";
 import { useForgeWeb } from "@/context/forge-web-context";
 
 const { Text, Title } = Typography;
 
 export function PropertyMaintenancePage() {
-  const { services, errors, fetchPublicData } = useForgeWeb();
+  const { services, isInitialLoading, isRefreshing, errors, fetchPublicData } = useForgeWeb();
 
   useEffect(() => {
     fetchPublicData();
-  }, []);
+  }, [fetchPublicData]);
 
   return (
     <AppShell>
@@ -38,7 +39,9 @@ export function PropertyMaintenancePage() {
           />
         ) : null}
 
-        {services.length ? (
+        {isInitialLoading || (isRefreshing && !services.length) ? (
+          <ListingSkeletonGrid count={6} />
+        ) : services.length ? (
           <div className="listing-grid">
             {services.map((service) => (
               <ListingCard

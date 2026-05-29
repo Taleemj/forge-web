@@ -1,9 +1,10 @@
 "use client";
 
-import { Card, Empty, Space, Typography } from "antd";
+import { Card, Empty, Skeleton, Space, Typography } from "antd";
 import { useMemo, useState, type ReactNode } from "react";
 
 import { ListingCard } from "@/components/listing-card";
+import { ListingSkeletonGrid } from "@/components/listing-skeleton";
 import { resolveAssetUrl } from "@/lib/api";
 
 const { Text, Title } = Typography;
@@ -48,12 +49,14 @@ export function DetailPageLayout({
   details,
   recommendationsTitle,
   recommendations,
+  loading,
 }: {
   media: DetailMediaItem[];
   fallbackImage: string;
   details: ReactNode;
   recommendationsTitle: string;
   recommendations: RecommendationItem[];
+  loading?: boolean;
 }) {
   const normalizedMedia = useMemo(
     () =>
@@ -63,6 +66,29 @@ export function DetailPageLayout({
     [fallbackImage, media],
   );
   const [activeIndex, setActiveIndex] = useState(0);
+
+  if (loading) {
+    return (
+      <Space direction="vertical" size={28} className="full-width">
+        <div className="detail-layout">
+          <Card className="detail-media-card">
+            <Skeleton.Button active style={{ width: "100%", height: 360 }} />
+          </Card>
+          <Card className="dashboard-card detail-info-card">{details}</Card>
+        </div>
+        <section>
+          <div className="section-head">
+            <Space direction="vertical" size={4}>
+              <Text className="dashboard-kicker">Recommended</Text>
+              <Skeleton.Input active style={{ width: 240 }} />
+            </Space>
+          </div>
+          <ListingSkeletonGrid count={3} />
+        </section>
+      </Space>
+    );
+  }
+
   const activeMedia = normalizedMedia[activeIndex] || normalizedMedia[0];
   const activeUrl = resolveAssetUrl(activeMedia.url) || fallbackImage;
   const activePoster =

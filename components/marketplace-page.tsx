@@ -1,11 +1,12 @@
 "use client";
 
-import { Alert, Empty, Segmented, Space, Typography } from "antd";
+import { Alert, Empty, Segmented, Skeleton, Space, Typography } from "antd";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 
 import { AppShell } from "@/components/app-shell";
 import { ListingCard } from "@/components/listing-card";
+import { ListingSkeletonGrid } from "@/components/listing-skeleton";
 import { useForgeWeb } from "@/context/forge-web-context";
 
 const { Text, Title } = Typography;
@@ -28,7 +29,7 @@ export function MarketplacePage({
   description: string;
 }) {
   const router = useRouter();
-  const { lands, designs, houses, errors, fetchPublicData } = useForgeWeb();
+  const { lands, designs, houses, isInitialLoading, isRefreshing, errors, fetchPublicData } = useForgeWeb();
 
   useEffect(() => {
     fetchPublicData();
@@ -95,7 +96,9 @@ export function MarketplacePage({
           <Alert type="warning" showIcon message={errors.publicData} style={{ marginBottom: 18 }} />
         ) : null}
 
-        {items.length ? (
+        {isInitialLoading || (isRefreshing && !items.length) ? (
+          <ListingSkeletonGrid count={6} />
+        ) : items.length ? (
           <div className="listing-grid">
             {items.map(({ key, ...item }) => (
               <ListingCard key={key} {...item} />

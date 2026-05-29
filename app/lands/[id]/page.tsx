@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Empty, Space, Tag, Typography } from "antd";
+import { Button, Empty, Skeleton, Space, Tag, Typography } from "antd";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
 
@@ -15,7 +15,7 @@ const fallbackImage =
 
 export default function LandDetailPage() {
   const params = useParams<{ id: string }>();
-  const { lands, fetchPublicData } = useForgeWeb();
+  const { lands, isInitialLoading, isRefreshing, fetchPublicData } = useForgeWeb();
   const land = lands.find((item) => item.id === params.id);
   const recommendations = lands
     .filter((item) => item.id !== params.id)
@@ -37,7 +37,22 @@ export default function LandDetailPage() {
   return (
     <AppShell>
       <section className="page-section">
-        {land ? (
+        {isInitialLoading || (isRefreshing && !land) ? (
+          <DetailPageLayout
+            loading
+            media={[]}
+            fallbackImage={fallbackImage}
+            recommendationsTitle="Similar Land Listings"
+            recommendations={[]}
+            details={
+              <Space direction="vertical" size={12} className="full-width">
+                <Skeleton.Button active style={{ width: 120 }} />
+                <Skeleton active title={{ width: "60%" }} paragraph={{ rows: 3 }} />
+                <Skeleton.Button active block size="large" />
+              </Space>
+            }
+          />
+        ) : land ? (
           <DetailPageLayout
             media={buildMediaItems(land.images, land.media)}
             fallbackImage={fallbackImage}

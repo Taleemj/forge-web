@@ -15,6 +15,7 @@ import {
   Empty,
   Flex,
   Progress,
+  Skeleton,
   Space,
   Typography,
 } from "antd";
@@ -23,6 +24,7 @@ import { useEffect, type ReactNode } from "react";
 
 import { AppShell } from "@/components/app-shell";
 import { ListingCard } from "@/components/listing-card";
+import { ListingSkeletonGrid, ProjectSkeletonGrid } from "@/components/listing-skeleton";
 import { useForgeWeb } from "@/context/forge-web-context";
 
 const { Text, Title } = Typography;
@@ -217,7 +219,9 @@ export default function HomePage() {
           <Button href="/property-maintenance">View all</Button>
         </div>
 
-        {featuredMaintenance.length ? (
+        {isInitialLoading || (isRefreshing && !featuredMaintenance.length) ? (
+          <ListingSkeletonGrid count={3} />
+        ) : featuredMaintenance.length ? (
           <div className="listing-grid">
             {featuredMaintenance.map(({ key, ...item }) => (
               <ListingCard key={key} {...item} />
@@ -237,7 +241,9 @@ export default function HomePage() {
           <Button href="/explore">View all</Button>
         </div>
 
-        {featuredListings.length ? (
+        {isInitialLoading || (isRefreshing && !featuredListings.length) ? (
+          <ListingSkeletonGrid count={3} />
+        ) : featuredListings.length ? (
           <div className="listing-grid">
             {featuredListings.map(({ key, ...item }) => (
               <ListingCard key={key} {...item} />
@@ -258,7 +264,9 @@ export default function HomePage() {
         </div>
 
         {isAuthenticated ? (
-          projects.length ? (
+          isInitialLoading || (isRefreshing && !projects.length) ? (
+            <ProjectSkeletonGrid count={4} />
+          ) : projects.length ? (
             <div className="project-grid">
               {projects.slice(0, 4).map((project) => (
                 <Link href={`/projects/${project.id}`} key={project.id}>

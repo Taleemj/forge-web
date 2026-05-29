@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Empty, Space, Tag, Typography } from "antd";
+import { Button, Empty, Skeleton, Space, Tag, Typography } from "antd";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -16,7 +16,7 @@ const fallbackImage =
 
 export default function ServiceDetailPage() {
   const params = useParams<{ id: string }>();
-  const { services, fetchPublicData } = useForgeWeb();
+  const { services, isInitialLoading, isRefreshing, fetchPublicData } = useForgeWeb();
   const [requestOpen, setRequestOpen] = useState(false);
   const service = services.find((item) => item.id === params.id);
   const recommendations = services
@@ -39,7 +39,19 @@ export default function ServiceDetailPage() {
   return (
     <AppShell>
       <section className="page-section">
-        {service ? (
+        {isInitialLoading || (isRefreshing && !service) ? (
+          <DetailPageLayout
+            loading
+            media={[]}
+            details={
+              <Space direction="vertical" size={12} className="full-width">
+                <Skeleton.Button active style={{ width: 120 }} />
+                <Skeleton active title={{ width: "60%" }} paragraph={{ rows: 3 }} />
+                <Skeleton.Button active block size="large" />
+              </Space>
+            }
+          />
+        ) : service ? (
           <>
             <DetailPageLayout
               media={buildMediaItems(service.images, service.media)}

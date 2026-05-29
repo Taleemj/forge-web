@@ -6,6 +6,7 @@ import {
   CreditCardOutlined,
   CompassOutlined,
   HomeOutlined,
+  LoadingOutlined,
   LoginOutlined,
   LogoutOutlined,
   MenuOutlined,
@@ -21,7 +22,9 @@ import {
   Flex,
   Layout,
   Menu,
+  Progress,
   Space,
+  Spin,
   Typography,
 } from "antd";
 import type { MenuProps } from "antd";
@@ -78,7 +81,7 @@ function selectedKey(pathname: string) {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isAuthenticated, notifications, signOut } = useForgeWeb();
+  const { user, isAuthenticated, notifications, isRefreshing, signOut } = useForgeWeb();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const unreadCount = notifications.filter(
     (notification) => !notification.isRead,
@@ -114,6 +117,26 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <Layout className="web-shell">
       <Header className="web-topbar">
+        {isRefreshing ? (
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 100,
+            }}
+          >
+            <Progress
+              percent={100}
+              status="active"
+              showInfo={false}
+              strokeColor="#2dd4bf"
+              strokeWidth={3}
+              style={{ margin: 0 }}
+            />
+          </div>
+        ) : null}
         <Link href="/" className="web-brand">
           <span className="web-brand-mark">
             <Image src="/app-logo.png" alt="" width={28} height={28} />
