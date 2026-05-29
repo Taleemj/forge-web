@@ -20,12 +20,16 @@ import {
   Typography,
 } from "antd";
 import Link from "next/link";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import { AppShell } from "@/components/app-shell";
+import { DesignRequestModal } from "@/components/design-request-modal";
 import { ListingCard } from "@/components/listing-card";
 import { ListingSkeletonGrid, ProjectSkeletonGrid } from "@/components/listing-skeleton";
+import { MaintenanceRequestModal } from "@/components/maintenance-request-modal";
+import { MarketplaceInterestModal } from "@/components/marketplace-interest-modal";
 import { useForgeWeb } from "@/context/forge-web-context";
+import type { Design, House, Land, ManagementService } from "@/types";
 
 const { Text, Title } = Typography;
 
@@ -110,6 +114,11 @@ export default function HomePage() {
     fetchProjects,
   } = useForgeWeb();
 
+  const [selectedLand, setSelectedLand] = useState<Land | null>(null);
+  const [selectedHouse, setSelectedHouse] = useState<House | null>(null);
+  const [selectedDesign, setSelectedDesign] = useState<Design | null>(null);
+  const [selectedService, setSelectedService] = useState<ManagementService | null>(null);
+
   useEffect(() => {
     fetchPublicData();
     fetchProjects();
@@ -124,6 +133,8 @@ export default function HomePage() {
       price: land.price,
       image: land.images?.[0],
       tag: "Land",
+      actionLabel: "Interested",
+      onAction: () => setSelectedLand(land),
     })),
     ...houses.slice(0, 1).map((house) => ({
       key: `house-${house.id}`,
@@ -133,6 +144,8 @@ export default function HomePage() {
       price: house.price,
       image: house.images?.[0],
       tag: "House",
+      actionLabel: "Interested",
+      onAction: () => setSelectedHouse(house),
     })),
     ...designs.slice(0, 1).map((design) => ({
       key: `design-${design.id}`,
@@ -142,6 +155,8 @@ export default function HomePage() {
       price: design.price,
       image: design.images?.[0],
       tag: "Design",
+      actionLabel: "Interested",
+      onAction: () => setSelectedDesign(design),
     })),
   ].slice(0, 3);
 
@@ -153,6 +168,8 @@ export default function HomePage() {
     price: service.price,
     image: service.images?.[0],
     tag: service.billingPeriod || "service",
+    actionLabel: "Interested",
+    onAction: () => setSelectedService(service),
   }));
 
   return (
@@ -313,6 +330,40 @@ export default function HomePage() {
           </Card>
         )}
       </section>
+
+      {selectedLand && (
+        <MarketplaceInterestModal
+          item={selectedLand}
+          type="land"
+          open={Boolean(selectedLand)}
+          onClose={() => setSelectedLand(null)}
+        />
+      )}
+
+      {selectedHouse && (
+        <MarketplaceInterestModal
+          item={selectedHouse}
+          type="house"
+          open={Boolean(selectedHouse)}
+          onClose={() => setSelectedHouse(null)}
+        />
+      )}
+
+      {selectedDesign && (
+        <DesignRequestModal
+          design={selectedDesign}
+          open={Boolean(selectedDesign)}
+          onClose={() => setSelectedDesign(null)}
+        />
+      )}
+
+      {selectedService && (
+        <MaintenanceRequestModal
+          service={selectedService}
+          open={Boolean(selectedService)}
+          onClose={() => setSelectedService(null)}
+        />
+      )}
     </AppShell>
   );
 }

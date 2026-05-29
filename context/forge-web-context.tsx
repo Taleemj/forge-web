@@ -16,11 +16,13 @@ import type {
   ConstructionRequestPayload,
   ConstructionService,
   Design,
+  DesignRequestPayload,
   House,
   Land,
   LoginPayload,
   MaintenanceRequestPayload,
   ManagementService,
+  MarketplaceInquiryPayload,
   Notification,
   Project,
   ResetPasswordPayload,
@@ -77,6 +79,12 @@ type ForgeWebContextValue = {
   ) => Promise<{ success: boolean; message?: string }>;
   requestConstructionService: (
     payload: ConstructionRequestPayload,
+  ) => Promise<{ success: boolean; message?: string }>;
+  requestDesign: (
+    payload: DesignRequestPayload,
+  ) => Promise<{ success: boolean; message?: string }>;
+  requestMarketplaceInquiry: (
+    payload: MarketplaceInquiryPayload,
   ) => Promise<{ success: boolean; message?: string }>;
   signOut: () => void;
 };
@@ -346,6 +354,33 @@ export function ForgeWebProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const requestDesign = useCallback(async (payload: DesignRequestPayload) => {
+    try {
+      const response = await forgeApi.requestDesign(
+        payload,
+        Boolean(getStoredToken()),
+      );
+      return { success: true, message: response.message };
+    } catch (error) {
+      return { success: false, message: getApiErrorMessage(error) };
+    }
+  }, []);
+
+  const requestMarketplaceInquiry = useCallback(
+    async (payload: MarketplaceInquiryPayload) => {
+      try {
+        const response = await forgeApi.requestMarketplaceInquiry(
+          payload,
+          Boolean(getStoredToken()),
+        );
+        return { success: true, message: response.message };
+      } catch (error) {
+        return { success: false, message: getApiErrorMessage(error) };
+      }
+    },
+    [],
+  );
+
   useEffect(() => {
     let isMounted = true;
     Promise.allSettled([
@@ -396,6 +431,8 @@ export function ForgeWebProvider({ children }: { children: ReactNode }) {
       resetPassword,
       requestMaintenanceService,
       requestConstructionService,
+      requestDesign,
+      requestMarketplaceInquiry,
       signOut,
     }),
     [
@@ -423,6 +460,8 @@ export function ForgeWebProvider({ children }: { children: ReactNode }) {
       resetPassword,
       requestMaintenanceService,
       requestConstructionService,
+      requestDesign,
+      requestMarketplaceInquiry,
       signOut,
     ],
   );

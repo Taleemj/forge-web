@@ -2,10 +2,11 @@
 
 import { Button, Empty, Skeleton, Space, Typography } from "antd";
 import { useParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { AppShell } from "@/components/app-shell";
 import { buildMediaItems, DetailPageLayout } from "@/components/detail-page-layout";
+import { DesignRequestModal } from "@/components/design-request-modal";
 import { useForgeWeb } from "@/context/forge-web-context";
 
 const { Text, Title } = Typography;
@@ -16,7 +17,9 @@ const fallbackImage =
 export default function DesignDetailPage() {
   const params = useParams<{ id: string }>();
   const { designs, isInitialLoading, isRefreshing, fetchPublicData } = useForgeWeb();
+  const [requestOpen, setRequestOpen] = useState(false);
   const design = designs.find((item) => item.id === params.id);
+
   const recommendations = designs
     .filter((item) => item.id !== params.id)
     .slice(0, 3)
@@ -53,25 +56,32 @@ export default function DesignDetailPage() {
             }
           />
         ) : design ? (
-          <DetailPageLayout
-            media={buildMediaItems(design.images, design.media)}
-            fallbackImage={fallbackImage}
-            recommendationsTitle="Similar House Designs"
-            recommendations={recommendations}
-            details={
-              <Space direction="vertical" size={12}>
-                <Text className="dashboard-kicker">House design</Text>
-                <Title level={1}>{design.title}</Title>
-                <Text>{design.description}</Text>
-                {design.floorPlan ? <Text type="secondary">Floor plan: {design.floorPlan}</Text> : null}
-                {design.descriptionMarkdown ? <Text>{design.descriptionMarkdown}</Text> : null}
-                <Text strong>UGX {design.price.toLocaleString()}</Text>
-                <Button type="primary" href="/login">
-                  Login to request consultation
-                </Button>
-              </Space>
-            }
-          />
+          <>
+            <DetailPageLayout
+              media={buildMediaItems(design.images, design.media)}
+              fallbackImage={fallbackImage}
+              recommendationsTitle="Similar House Designs"
+              recommendations={recommendations}
+              details={
+                <Space direction="vertical" size={12}>
+                  <Text className="dashboard-kicker">House design</Text>
+                  <Title level={1}>{design.title}</Title>
+                  <Text>{design.description}</Text>
+                  {design.floorPlan ? <Text type="secondary">Floor plan: {design.floorPlan}</Text> : null}
+                  {design.descriptionMarkdown ? <Text>{design.descriptionMarkdown}</Text> : null}
+                  <Text strong>UGX {design.price.toLocaleString()}</Text>
+                  <Button type="primary" size="large" onClick={() => setRequestOpen(true)}>
+                    Request design consultation
+                  </Button>
+                </Space>
+              }
+            />
+            <DesignRequestModal
+              design={design}
+              open={requestOpen}
+              onClose={() => setRequestOpen(false)}
+            />
+          </>
         ) : (
           <Empty description="Design not found" />
         )}

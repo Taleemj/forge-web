@@ -4,11 +4,13 @@ import type {
   ConstructionRequestPayload,
   ConstructionService,
   Design,
+  DesignRequestPayload,
   House,
   Land,
   LoginPayload,
   MaintenanceRequestPayload,
   ManagementService,
+  MarketplaceInquiryPayload,
   Notification,
   Project,
   ResetPasswordPayload,
@@ -127,6 +129,25 @@ export const forgeApi = {
   async requestConstruction(payload: ConstructionRequestPayload, authenticated: boolean) {
     const response = await apiClient.post<{ message: string; request: unknown }>(
       authenticated ? "/auth/construction-requests" : "/public/construction-requests",
+      payload,
+    );
+    return response.data;
+  },
+
+  async requestDesign(payload: DesignRequestPayload, authenticated: boolean) {
+    const response = await apiClient.post<{ message: string; request: unknown }>(
+      authenticated ? "/auth/design-requests" : "/public/design-requests",
+      payload,
+    );
+    return response.data;
+  },
+
+  async requestMarketplaceInquiry(
+    payload: MarketplaceInquiryPayload,
+    authenticated: boolean,
+  ) {
+    const response = await apiClient.post<{ message: string; inquiry: unknown }>(
+      authenticated ? "/auth/marketplace-inquiries" : "/public/marketplace-inquiries",
       payload,
     );
     return response.data;

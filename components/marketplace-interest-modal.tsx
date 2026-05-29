@@ -3,60 +3,45 @@
 import { Button, Form, Input, Modal, Space, Typography } from "antd";
 import { useState } from "react";
 
-import { GoogleMapPicker } from "@/components/google-map-picker";
 import { useForgeWeb } from "@/context/forge-web-context";
-import type { ManagementService } from "@/types";
+import type { House, Land } from "@/types";
 
 const { Text } = Typography;
 
-type LocationValue = {
-  label?: string;
-  latitude?: number;
-  longitude?: number;
-};
-
-type RequestValues = {
+type InterestValues = {
   name?: string;
   email?: string;
   phone?: string;
-  propertyNotes?: string;
+  notes?: string;
 };
 
-export function MaintenanceRequestModal({
-  service,
+export function MarketplaceInterestModal({
+  item,
+  type,
   open,
   onClose,
 }: {
-  service: ManagementService;
+  item: Land | House;
+  type: "land" | "house";
   open: boolean;
   onClose: () => void;
 }) {
-  const { isAuthenticated, requestMaintenanceService } = useForgeWeb();
-  const [form] = Form.useForm<RequestValues>();
-  const [location, setLocation] = useState<LocationValue>({});
+  const { isAuthenticated, requestMarketplaceInquiry } = useForgeWeb();
+  const [form] = Form.useForm<InterestValues>();
   const [loading, setLoading] = useState(false);
   const [resultMessage, setResultMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = async (values: RequestValues) => {
+  const handleSubmit = async (values: InterestValues) => {
     setErrorMessage(null);
     setResultMessage(null);
 
-    if (!location.label?.trim()) {
-      setErrorMessage("Enter the property address or location label.");
-      return;
-    }
-
-    if (location.latitude === undefined || location.longitude === undefined) {
-      setErrorMessage("Pin the property location on the map or enter coordinates.");
-      return;
-    }
-
     setLoading(true);
-    const result = await requestMaintenanceService({
-      serviceId: service.id,
-      location,
-      propertyNotes: values.propertyNotes,
+    const result = await requestMarketplaceInquiry({
+      itemType: type,
+      landId: type === "land" ? item.id : undefined,
+      houseId: type === "house" ? item.id : undefined,
+      notes: values.notes,
       guestInfo: isAuthenticated
         ? undefined
         : {
@@ -68,29 +53,29 @@ export function MaintenanceRequestModal({
     setLoading(false);
 
     if (result.success) {
-      setResultMessage(result.message || "Request submitted");
+      setResultMessage(result.message || "Interest submitted");
       form.resetFields();
-      setLocation({});
       return;
     }
 
-    setErrorMessage(result.message || "Unable to submit request");
+    setErrorMessage(result.message || "Unable to submit interest");
   };
 
   return (
     <Modal
-      title={`Request ${service.title}`}
+      title={`Interested in ${item.title}?`}
       open={open}
       onCancel={onClose}
       footer={null}
-      width={760}
-      centered={false}
-      style={{ top: 28 }}
+      width={500}
+      centered
       destroyOnClose
     >
       <Space direction="vertical" size={10} className="full-width">
         <Text type="secondary">
-          Pin your property location and share enough detail for Forge to prepare a quote.
+          {type === "land"
+            ? "Want to visit the site or know more about this land? Share your details and Forge will get back to you."
+            : "Interested in this house? Request a viewing or ask for more details below."}
         </Text>
 
         <Form form={form} layout="vertical" requiredMark={false} onFinish={handleSubmit}>
@@ -116,14 +101,10 @@ export function MaintenanceRequestModal({
             </div>
           ) : null}
 
-          <Form.Item label="Property location" required>
-            <GoogleMapPicker value={location} onChange={setLocation} />
-          </Form.Item>
-
-          <Form.Item label="Property notes" name="propertyNotes">
+          <Form.Item label="How can we help?" name="notes">
             <Input.TextArea
               rows={4}
-              placeholder="Describe the property condition, access details, urgency, or service expectations."
+              placeholder="e.g. I want to visit the site next week, or please send more documents."
             />
           </Form.Item>
 
@@ -133,7 +114,7 @@ export function MaintenanceRequestModal({
           <Space className="request-modal-actions">
             <Button onClick={onClose}>Close</Button>
             <Button type="primary" htmlType="submit" loading={loading}>
-              Submit request
+              Submit interest
             </Button>
           </Space>
         </Form>

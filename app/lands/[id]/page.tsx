@@ -2,10 +2,11 @@
 
 import { Button, Empty, Skeleton, Space, Tag, Typography } from "antd";
 import { useParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { AppShell } from "@/components/app-shell";
 import { buildMediaItems, DetailPageLayout } from "@/components/detail-page-layout";
+import { MarketplaceInterestModal } from "@/components/marketplace-interest-modal";
 import { useForgeWeb } from "@/context/forge-web-context";
 
 const { Text, Title } = Typography;
@@ -16,7 +17,9 @@ const fallbackImage =
 export default function LandDetailPage() {
   const params = useParams<{ id: string }>();
   const { lands, isInitialLoading, isRefreshing, fetchPublicData } = useForgeWeb();
+  const [interestOpen, setInterestOpen] = useState(false);
   const land = lands.find((item) => item.id === params.id);
+
   const recommendations = lands
     .filter((item) => item.id !== params.id)
     .slice(0, 3)
@@ -53,25 +56,33 @@ export default function LandDetailPage() {
             }
           />
         ) : land ? (
-          <DetailPageLayout
-            media={buildMediaItems(land.images, land.media)}
-            fallbackImage={fallbackImage}
-            recommendationsTitle="Similar Land Listings"
-            recommendations={recommendations}
-            details={
-              <Space direction="vertical" size={12}>
-                <Tag color="processing">{land.status}</Tag>
-                <Title level={1}>{land.title}</Title>
-                <Text type="secondary">{land.location}</Text>
-                <Text strong>UGX {land.price.toLocaleString()}</Text>
-                <Text>{land.size}</Text>
-                {land.descriptionMarkdown ? <Text>{land.descriptionMarkdown}</Text> : null}
-                <Button type="primary" href="/login">
-                  Login to enquire
-                </Button>
-              </Space>
-            }
-          />
+          <>
+            <DetailPageLayout
+              media={buildMediaItems(land.images, land.media)}
+              fallbackImage={fallbackImage}
+              recommendationsTitle="Similar Land Listings"
+              recommendations={recommendations}
+              details={
+                <Space direction="vertical" size={12}>
+                  <Tag color="processing">{land.status}</Tag>
+                  <Title level={1}>{land.title}</Title>
+                  <Text type="secondary">{land.location}</Text>
+                  <Text strong>UGX {land.price.toLocaleString()}</Text>
+                  <Text>{land.size}</Text>
+                  {land.descriptionMarkdown ? <Text>{land.descriptionMarkdown}</Text> : null}
+                  <Button type="primary" size="large" onClick={() => setInterestOpen(true)}>
+                    Interested in this land?
+                  </Button>
+                </Space>
+              }
+            />
+            <MarketplaceInterestModal
+              item={land}
+              type="land"
+              open={interestOpen}
+              onClose={() => setInterestOpen(false)}
+            />
+          </>
         ) : (
           <Empty description="Land listing not found" />
         )}

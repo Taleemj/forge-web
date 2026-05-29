@@ -211,6 +211,28 @@ export type ConstructionRequestPayload = {
   };
 };
 
+export type DesignRequestPayload = {
+  designId: string;
+  notes?: string;
+  guestInfo?: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+};
+
+export type MarketplaceInquiryPayload = {
+  itemType: "land" | "house";
+  landId?: string;
+  houseId?: string;
+  notes?: string;
+  guestInfo?: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+};
+
 export type AuthResponse = {
   token: string;
   user: User;

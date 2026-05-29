@@ -103,8 +103,12 @@ export function ConstructionInterestModal({
               <Form.Item label="Full name" name="name" rules={[{ required: true }]}>
                 <Input />
               </Form.Item>
-              <Form.Item label="Phone" name="phone" rules={[{ required: true }]}>
-                <Input />
+              <Form.Item
+                label="Phone (WhatsApp preferred)"
+                name="phone"
+                rules={[{ required: true }]}
+              >
+                <Input placeholder="e.g. +256 700 000 000" />
               </Form.Item>
               <Form.Item
                 label="Email"

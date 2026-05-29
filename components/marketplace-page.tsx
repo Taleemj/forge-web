@@ -2,12 +2,15 @@
 
 import { Alert, Empty, Segmented, Skeleton, Space, Typography } from "antd";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { AppShell } from "@/components/app-shell";
+import { DesignRequestModal } from "@/components/design-request-modal";
 import { ListingCard } from "@/components/listing-card";
 import { ListingSkeletonGrid } from "@/components/listing-skeleton";
+import { MarketplaceInterestModal } from "@/components/marketplace-interest-modal";
 import { useForgeWeb } from "@/context/forge-web-context";
+import type { Design, House, Land } from "@/types";
 
 const { Text, Title } = Typography;
 
@@ -29,7 +32,19 @@ export function MarketplacePage({
   description: string;
 }) {
   const router = useRouter();
-  const { lands, designs, houses, isInitialLoading, isRefreshing, errors, fetchPublicData } = useForgeWeb();
+  const {
+    lands,
+    designs,
+    houses,
+    isInitialLoading,
+    isRefreshing,
+    errors,
+    fetchPublicData,
+  } = useForgeWeb();
+
+  const [selectedLand, setSelectedLand] = useState<Land | null>(null);
+  const [selectedHouse, setSelectedHouse] = useState<House | null>(null);
+  const [selectedDesign, setSelectedDesign] = useState<Design | null>(null);
 
   useEffect(() => {
     fetchPublicData();
@@ -45,6 +60,8 @@ export function MarketplacePage({
         price: design.price,
         image: design.images?.[0],
         tag: "House Design",
+        actionLabel: "Interested",
+        onAction: () => setSelectedDesign(design),
       }));
     }
 
@@ -57,6 +74,8 @@ export function MarketplacePage({
         price: house.price,
         image: house.images?.[0],
         tag: house.status,
+        actionLabel: "Interested",
+        onAction: () => setSelectedHouse(house),
       }));
     }
 
@@ -68,6 +87,8 @@ export function MarketplacePage({
       price: land.price,
       image: land.images?.[0],
       tag: land.status,
+      actionLabel: "Interested",
+      onAction: () => setSelectedLand(land),
     }));
   }, [category, designs, houses, lands]);
 
@@ -83,7 +104,9 @@ export function MarketplacePage({
           <Segmented
             className="explore-tabs"
             value={category}
-            onChange={(value) => router.push(categoryRoutes[value as MarketplaceCategory])}
+            onChange={(value) =>
+              router.push(categoryRoutes[value as MarketplaceCategory])
+            }
             options={[
               { label: "Land Listings", value: "lands" },
               { label: "House Listings", value: "houses" },
@@ -93,7 +116,12 @@ export function MarketplacePage({
         </div>
 
         {errors.publicData ? (
-          <Alert type="warning" showIcon message={errors.publicData} style={{ marginBottom: 18 }} />
+          <Alert
+            type="warning"
+            showIcon
+            message={errors.publicData}
+            style={{ marginBottom: 18 }}
+          />
         ) : null}
 
         {isInitialLoading || (isRefreshing && !items.length) ? (
@@ -108,6 +136,32 @@ export function MarketplacePage({
           <Empty description="No listings available yet" />
         )}
       </section>
+
+      {selectedLand && (
+        <MarketplaceInterestModal
+          item={selectedLand}
+          type="land"
+          open={Boolean(selectedLand)}
+          onClose={() => setSelectedLand(null)}
+        />
+      )}
+
+      {selectedHouse && (
+        <MarketplaceInterestModal
+          item={selectedHouse}
+          type="house"
+          open={Boolean(selectedHouse)}
+          onClose={() => setSelectedHouse(null)}
+        />
+      )}
+
+      {selectedDesign && (
+        <DesignRequestModal
+          design={selectedDesign}
+          open={Boolean(selectedDesign)}
+          onClose={() => setSelectedDesign(null)}
+        />
+      )}
     </AppShell>
   );
 }

@@ -2,10 +2,11 @@
 
 import { Button, Empty, Skeleton, Space, Tag, Typography } from "antd";
 import { useParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { AppShell } from "@/components/app-shell";
 import { buildMediaItems, DetailPageLayout } from "@/components/detail-page-layout";
+import { MarketplaceInterestModal } from "@/components/marketplace-interest-modal";
 import { useForgeWeb } from "@/context/forge-web-context";
 
 const { Text, Title } = Typography;
@@ -16,7 +17,9 @@ const fallbackImage =
 export default function HouseDetailPage() {
   const params = useParams<{ id: string }>();
   const { houses, isInitialLoading, isRefreshing, fetchPublicData } = useForgeWeb();
+  const [interestOpen, setInterestOpen] = useState(false);
   const house = houses.find((item) => item.id === params.id);
+
   const recommendations = houses
     .filter((item) => item.id !== params.id)
     .slice(0, 3)
@@ -53,27 +56,35 @@ export default function HouseDetailPage() {
             }
           />
         ) : house ? (
-          <DetailPageLayout
-            media={buildMediaItems(house.images, house.media)}
-            fallbackImage={fallbackImage}
-            recommendationsTitle="Similar House Listings"
-            recommendations={recommendations}
-            details={
-              <Space direction="vertical" size={12}>
-                <Tag color="processing">{house.status}</Tag>
-                <Title level={1}>{house.title}</Title>
-                <Text type="secondary">{house.location}</Text>
-                <Text>
-                  {house.bedrooms} bedrooms · {house.bathrooms} bathrooms · {house.size}
-                </Text>
-                {house.descriptionMarkdown ? <Text>{house.descriptionMarkdown}</Text> : null}
-                <Text strong>UGX {house.price.toLocaleString()}</Text>
-                <Button type="primary" href="/login">
-                  Login to enquire
-                </Button>
-              </Space>
-            }
-          />
+          <>
+            <DetailPageLayout
+              media={buildMediaItems(house.images, house.media)}
+              fallbackImage={fallbackImage}
+              recommendationsTitle="Similar House Listings"
+              recommendations={recommendations}
+              details={
+                <Space direction="vertical" size={12}>
+                  <Tag color="processing">{house.status}</Tag>
+                  <Title level={1}>{house.title}</Title>
+                  <Text type="secondary">{house.location}</Text>
+                  <Text>
+                    {house.bedrooms} bedrooms · {house.bathrooms} bathrooms · {house.size}
+                  </Text>
+                  {house.descriptionMarkdown ? <Text>{house.descriptionMarkdown}</Text> : null}
+                  <Text strong>UGX {house.price.toLocaleString()}</Text>
+                  <Button type="primary" size="large" onClick={() => setInterestOpen(true)}>
+                    Interested in this house?
+                  </Button>
+                </Space>
+              }
+            />
+            <MarketplaceInterestModal
+              item={house}
+              type="house"
+              open={interestOpen}
+              onClose={() => setInterestOpen(false)}
+            />
+          </>
         ) : (
           <Empty description="House not found" />
         )}

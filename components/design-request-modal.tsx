@@ -3,37 +3,29 @@
 import { Button, Form, Input, Modal, Space, Typography } from "antd";
 import { useState } from "react";
 
-import { GoogleMapPicker } from "@/components/google-map-picker";
 import { useForgeWeb } from "@/context/forge-web-context";
-import type { ManagementService } from "@/types";
+import type { Design } from "@/types";
 
 const { Text } = Typography;
-
-type LocationValue = {
-  label?: string;
-  latitude?: number;
-  longitude?: number;
-};
 
 type RequestValues = {
   name?: string;
   email?: string;
   phone?: string;
-  propertyNotes?: string;
+  notes?: string;
 };
 
-export function MaintenanceRequestModal({
-  service,
+export function DesignRequestModal({
+  design,
   open,
   onClose,
 }: {
-  service: ManagementService;
+  design: Design;
   open: boolean;
   onClose: () => void;
 }) {
-  const { isAuthenticated, requestMaintenanceService } = useForgeWeb();
+  const { isAuthenticated, requestDesign } = useForgeWeb();
   const [form] = Form.useForm<RequestValues>();
-  const [location, setLocation] = useState<LocationValue>({});
   const [loading, setLoading] = useState(false);
   const [resultMessage, setResultMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -42,21 +34,10 @@ export function MaintenanceRequestModal({
     setErrorMessage(null);
     setResultMessage(null);
 
-    if (!location.label?.trim()) {
-      setErrorMessage("Enter the property address or location label.");
-      return;
-    }
-
-    if (location.latitude === undefined || location.longitude === undefined) {
-      setErrorMessage("Pin the property location on the map or enter coordinates.");
-      return;
-    }
-
     setLoading(true);
-    const result = await requestMaintenanceService({
-      serviceId: service.id,
-      location,
-      propertyNotes: values.propertyNotes,
+    const result = await requestDesign({
+      designId: design.id,
+      notes: values.notes,
       guestInfo: isAuthenticated
         ? undefined
         : {
@@ -70,7 +51,6 @@ export function MaintenanceRequestModal({
     if (result.success) {
       setResultMessage(result.message || "Request submitted");
       form.resetFields();
-      setLocation({});
       return;
     }
 
@@ -79,18 +59,18 @@ export function MaintenanceRequestModal({
 
   return (
     <Modal
-      title={`Request ${service.title}`}
+      title={`Request Design: ${design.title}`}
       open={open}
       onCancel={onClose}
       footer={null}
-      width={760}
-      centered={false}
-      style={{ top: 28 }}
+      width={500}
+      centered
       destroyOnClose
     >
       <Space direction="vertical" size={10} className="full-width">
         <Text type="secondary">
-          Pin your property location and share enough detail for Forge to prepare a quote.
+          Interested in this design? Share your details and a Forge specialist will
+          get in touch to discuss customization, site fit, and next steps.
         </Text>
 
         <Form form={form} layout="vertical" requiredMark={false} onFinish={handleSubmit}>
@@ -116,14 +96,10 @@ export function MaintenanceRequestModal({
             </div>
           ) : null}
 
-          <Form.Item label="Property location" required>
-            <GoogleMapPicker value={location} onChange={setLocation} />
-          </Form.Item>
-
-          <Form.Item label="Property notes" name="propertyNotes">
+          <Form.Item label="Notes (optional)" name="notes">
             <Input.TextArea
               rows={4}
-              placeholder="Describe the property condition, access details, urgency, or service expectations."
+              placeholder="Tell us more about your plot location or any specific requirements."
             />
           </Form.Item>
 
@@ -133,7 +109,7 @@ export function MaintenanceRequestModal({
           <Space className="request-modal-actions">
             <Button onClick={onClose}>Close</Button>
             <Button type="primary" htmlType="submit" loading={loading}>
-              Submit request
+              Send request
             </Button>
           </Space>
         </Form>

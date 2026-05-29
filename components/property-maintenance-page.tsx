@@ -1,17 +1,27 @@
 "use client";
 
 import { Alert, Empty, Skeleton, Space, Typography } from "antd";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { AppShell } from "@/components/app-shell";
 import { ListingCard } from "@/components/listing-card";
 import { ListingSkeletonGrid } from "@/components/listing-skeleton";
+import { MaintenanceRequestModal } from "@/components/maintenance-request-modal";
 import { useForgeWeb } from "@/context/forge-web-context";
+import type { ManagementService } from "@/types";
 
 const { Text, Title } = Typography;
 
 export function PropertyMaintenancePage() {
-  const { services, isInitialLoading, isRefreshing, errors, fetchPublicData } = useForgeWeb();
+  const {
+    services,
+    isInitialLoading,
+    isRefreshing,
+    errors,
+    fetchPublicData,
+  } = useForgeWeb();
+
+  const [selectedService, setSelectedService] = useState<ManagementService | null>(null);
 
   useEffect(() => {
     fetchPublicData();
@@ -52,6 +62,8 @@ export function PropertyMaintenancePage() {
                 price={service.price}
                 image={service.images?.[0]}
                 tag={service.billingPeriod || "service"}
+                actionLabel="Request Quote"
+                onAction={() => setSelectedService(service)}
               />
             ))}
           </div>
@@ -59,6 +71,14 @@ export function PropertyMaintenancePage() {
           <Empty description="No maintenance services available yet" />
         )}
       </section>
+
+      {selectedService && (
+        <MaintenanceRequestModal
+          service={selectedService}
+          open={Boolean(selectedService)}
+          onClose={() => setSelectedService(null)}
+        />
+      )}
     </AppShell>
   );
 }
